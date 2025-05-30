@@ -10,6 +10,7 @@ defmodule BotsPlatformWeb.Schema do
       |> Dataloader.add_source(BotsPlatform.Accounts, BotsPlatform.Accounts.data())
       |> Dataloader.add_source(BotsPlatform.Bots, BotsPlatform.Bots.data())
       |> Dataloader.add_source(BotsPlatform.Messages, BotsPlatform.Messages.data())
+      |> Dataloader.add_source(BotsPlatform.Chats, BotsPlatform.Chats.data())
 
     Map.put(ctx, :loader, loader)
   end
@@ -18,12 +19,32 @@ defmodule BotsPlatformWeb.Schema do
     [Absinthe.Middleware.Dataloader] ++ Absinthe.Plugin.defaults()
   end
 
-  # Запросы
   query do
     @desc "Получить информацию о текущем пользователе"
     field :me, :user do
       arg(:token, non_null(:string))
       resolve(&Resolvers.Accounts.get_user/3)
+    end
+
+    @desc "Получить список чатов бота с пагинацией"
+    field :chats, list_of(:chat) do
+      arg(:bot_id, non_null(:id))
+      arg(:token, non_null(:string))
+      arg(:limit, :integer, default_value: 20)
+      arg(:offset, :integer, default_value: 0)
+      arg(:search, :string) # Для поиска по заголовку чата
+      resolve(&Resolvers.Chats.list_chats/3)
+    end
+
+    @desc "Получить список сообщений для чата с пагинацией"
+    field :chat_messages, list_of(:message) do
+      arg(:chat_id, non_null(:string))
+      arg(:bot_id, non_null(:id))
+      arg(:token, non_null(:string))
+      arg(:limit, :integer, default_value: 50)
+      arg(:offset, :integer, default_value: 0)
+      arg(:search, :string) # Для поиска по тексту сообщений
+      resolve(&Resolvers.Messages.list_chat_messages/3)
     end
 
     @desc "Получить список ботов"
@@ -65,9 +86,16 @@ defmodule BotsPlatformWeb.Schema do
       arg(:token, non_null(:string))
       resolve(&Resolvers.Subscriptions.is_subscribed/3)
     end
+
+    @desc "Получить чат по chat_id"
+    field :chat, :chat do
+      arg(:chat_id, non_null(:string))
+      arg(:bot_id, non_null(:id))
+      arg(:token, non_null(:string))
+      resolve(&Resolvers.Chats.get_chat/3)
+    end
   end
 
-  # Мутации
   mutation do
     @desc "Регистрация нового пользователя"
     field :register, :session do
@@ -97,7 +125,7 @@ defmodule BotsPlatformWeb.Schema do
     end
 
     @desc "Удаление бота"
-    field :delete_bot, :bot do
+    field :delete_bot, :delete_bot_result do
       arg(:id, non_null(:id))
       arg(:token, non_null(:string))
       resolve(&Resolvers.Bots.delete_bot/3)
@@ -138,9 +166,22 @@ defmodule BotsPlatformWeb.Schema do
       arg(:token, non_null(:string))
       resolve(&Resolvers.Subscriptions.unsubscribe_from_bot/3)
     end
+
+    @desc "Проверка статуса webhook бота"
+    field :check_webhook_status, :bot do
+      arg(:id, non_null(:id))
+      arg(:token, non_null(:string))
+      resolve(&Resolvers.Bots.check_webhook_status/3)
+    end
+
+    @desc "Создать новое сообщение от имени бота"
+    field :create_message, :message do
+      arg(:input, non_null(:message_input))
+      arg(:token, non_null(:string))
+      resolve(&Resolvers.Messages.create_message/3)
+    end
   end
 
-  # Подписки
   subscription do
     @desc "Подписка на новые сообщения от бота"
     field :new_message, :message do
@@ -169,19 +210,16 @@ defmodule BotsPlatformWeb.Schema do
         end
       end)
 
-      trigger([:new_message],
-        topic: fn message ->
-          "bot:#{message.bot_id}"
-        end
-      )
+      trigger(:create_message, topic: fn message ->
+        "bot:#{message.bot_id}"
+      end)
 
-      resolve(fn payload, _, _ ->
-        {:ok, payload}
+      resolve(fn message, _, _ ->
+        {:ok, message}
       end)
     end
   end
 
-  # Вспомогательные функции
   defp authenticate_token("Bearer " <> token) do
     case BotsPlatform.Auth.Guardian.decode_and_verify(token) do
       {:ok, claims} -> BotsPlatform.Auth.Guardian.resource_from_claims(claims)

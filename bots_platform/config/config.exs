@@ -28,11 +28,6 @@ config :absinthe, schema: BotsPlatformWeb.Schema
 config :ex_gram,
   json_library: Jason
 
-# config :telegex,
-#   # Оставляем nil, так как используем токены из базы данных
-#   token: nil,
-#   adapter: Telegex.Adapter.Tesla
-
 config :tesla, adapter: Tesla.Adapter.Hackney
 
 # Настройте Absinthe.Phoenix с использованием PubSub

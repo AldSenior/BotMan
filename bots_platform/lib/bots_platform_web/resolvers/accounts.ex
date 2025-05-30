@@ -41,36 +41,33 @@ defmodule BotsPlatformWeb.Resolvers.Accounts do
   @doc """
   Получение информации о текущем пользователе
   """
-  def get_user(_, %{token: token}, _) when is_binary(token) do
-     # Обработка токена с префиксом "Bearer"
-     token = case String.split(token, "Bearer ") do
-       [token] -> token
-       [_, token] -> token
-     end
+  def get_user(_, %{token: token}, _) do
+    token =
+      token
+      |> String.trim()
+      |> String.replace_prefix("Bearer ", "")
 
-     case Guardian.decode_and_verify(token) do
-       {:ok, claims} ->
-         case Guardian.resource_from_claims(claims) do
-           {:ok, user} -> {:ok, user}
-           {:error, reason} ->
-             Logger.error("Failed to get user from claims: #{inspect(reason)}")
-             {:error, "Invalid token"}
-         end
-       {:error, reason} ->
-         Logger.error("Token verification failed: #{inspect(reason)}")
-         {:error, "Invalid token"}
-     end
-   end
+    case Guardian.decode_and_verify(token) do
+      {:ok, claims} ->
+        case Guardian.resource_from_claims(claims) do
+          {:ok, user} -> {:ok, user}
+          error -> error
+        end
 
-   # Для случая, когда токен передан через контекст
-   def get_user(_, _, %{context: %{current_user: current_user}}) do
-     {:ok, current_user}
-   end
+      error ->
+        error
+    end
+  end
 
-   # Для случая, когда нет ни токена, ни пользователя в контексте
-   def get_user(_, _, _) do
-     {:error, "Not authenticated"}
-   end
+  # Для случая, когда токен передан через контекст
+  def get_user(_, _, %{context: %{current_user: current_user}}) do
+    {:ok, current_user}
+  end
+
+  # Для случая, когда нет ни токена, ни пользователя в контексте
+  def get_user(_, _, _) do
+    {:error, "Not authenticated"}
+  end
 
   # Вспомогательные функции
 

@@ -69,7 +69,6 @@ defmodule BotsPlatformWeb.Resolvers.Bots do
 
     case args do
       %{input: params, token: token} ->
-        # Удаляем префикс Bearer, если он есть
         clean_token = String.replace(token, "Bearer ", "")
         Logger.info("Processing with token: #{clean_token}")
 
@@ -111,20 +110,6 @@ defmodule BotsPlatformWeb.Resolvers.Bots do
     end
   end
 
-  defp format_changeset_errors(changeset) do
-      errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-        Enum.reduce(opts, msg, fn
-          {key, value}, acc when is_binary(value) ->
-            String.replace(acc, "%{#{key}}", value)
-          {key, value}, acc ->
-            String.replace(acc, "%{#{key}}", to_string(value))
-        end)
-      end)
-
-      %{message: "Validation failed", details: errors}
-    end
-
-
   # Обновление бота
   def update_bot(_, %{id: id, input: params, token: token}, _) when is_binary(token) do
     with {:ok, user} <- authenticate_token(token),
@@ -144,8 +129,18 @@ defmodule BotsPlatformWeb.Resolvers.Bots do
     with {:ok, user} <- authenticate_token(token),
          bot when not is_nil(bot) <- Bots.get_bot(id) do
       cond do
-        user.is_admin || bot.user_id == user.id -> Bots.delete_bot(bot)
-        true -> {:error, "Нет доступа к этому боту"}
+        user.is_admin || bot.user_id == user.id ->
+          case Bots.delete_bot(bot) do
+            {:ok, _bot} ->
+              {:ok, %{id: id, success: true, message: "Bot deleted successfully"}}
+
+            {:error, changeset} ->
+              Logger.error("Bot deletion failed: #{inspect(changeset.errors)}")
+              {:error, format_changeset_errors(changeset)}
+          end
+
+        true ->
+          {:error, "Нет доступа к этому боту"}
       end
     else
       nil -> {:error, "Бот не найден"}
@@ -173,7 +168,6 @@ defmodule BotsPlatformWeb.Resolvers.Bots do
 
     case args do
       %{input: params, token: token} ->
-        # Удаляем префикс Bearer, если он есть
         clean_token = String.replace(token, "Bearer ", "")
         Logger.info("Processing with token: #{clean_token}")
 
@@ -254,18 +248,29 @@ defmodule BotsPlatformWeb.Resolvers.Bots do
     end
   end
 
-  defp format_errors(changeset) do
+  # Форматирование ошибок changeset
+  defp format_changeset_errors(changeset) do
     errors =
       Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-        Enum.reduce(opts, msg, fn
-          {key, value}, acc when is_binary(value) ->
-            String.replace(acc, "%{#{key}}", value)
-
-          {key, value}, acc ->
-            String.replace(acc, "%{#{key}}", to_string(value))
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          safe_value = safe_to_string(value)
+          String.replace(acc, "%{#{key}}", safe_value)
         end)
       end)
+      |> Enum.map(fn {field, errors} ->
+        "#{field}: #{Enum.join(errors, ", ")}"
+      end)
+      |> Enum.join("; ")
 
-    {:error, message: "Validation failed", details: errors}
+    %{message: "Validation failed", details: errors}
   end
+
+  # Безопасное преобразование в строку
+  defp safe_to_string(value) when is_atom(value), do: Atom.to_string(value)
+  defp safe_to_string(value) when is_binary(value), do: value
+  defp safe_to_string(value) when is_number(value), do: to_string(value)
+  defp safe_to_string(_value), do: "invalid value"
+
+  # Удаляем дублирующую функцию format_errors
+  # defp format_errors(changeset), do: format_changeset_errors(changeset)
 end

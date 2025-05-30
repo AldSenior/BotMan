@@ -4,7 +4,14 @@ defmodule BotsPlatformWeb.Router do
   pipeline :api do
     plug(:accepts, ["json"])
     # Если вы используете CORS
-    # plug CORSPlug, origin: "*"
+    plug(CORSPlug, origin: ["http://localhost:3000"])
+  end
+
+  pipeline :browser do
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   # Публичные маршруты без аутентификации
@@ -20,7 +27,13 @@ defmodule BotsPlatformWeb.Router do
       socket: BotsPlatformWeb.UserSocket,
       interface: :playground
     )
+
+    # REST-эндпоинт для загрузки файлов
+    post("/upload", BotsPlatformWeb.FileController, :upload)
   end
 
-  # Остальные маршруты...
+  scope "/" do
+    pipe_through(:browser)
+    get("/uploads/*path", BotsPlatformWeb.UploadController, :serve)
+  end
 end

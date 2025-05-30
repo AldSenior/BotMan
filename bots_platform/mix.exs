@@ -43,6 +43,7 @@ defmodule BotsPlatform.MixProject do
       # GraphQL сервер
       {:absinthe, "~> 1.7"},
       # GraphQL через HTTP
+      {:uuid, "~> 1.1"},
       {:absinthe_plug, "~> 1.5"},
       {:swoosh, "~> 1.5"},
       # GraphQL через WebSocket
