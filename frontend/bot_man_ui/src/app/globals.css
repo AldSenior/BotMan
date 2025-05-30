@@ -1,0 +1,396 @@
+@import "tailwindcss";
+/* Общие стили */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #0a1a2f; /* Тёмно-синий фон */
+  color: #d0e6ff; /* Светло-синий текст */
+}
+
+/* Контейнер страницы */
+.page-container {
+  max-width: 90%;
+  margin: 20px auto;
+  min-height: calc(100vh - 80px);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Навигационное меню */
+.nav-menu {
+  background-color: #1e2a44; /* Тёмно-синий фон меню */
+  padding: 15px 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-menu li {
+  position: relative;
+}
+
+.nav-menu a {
+  color: #d0e6ff;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+  display: block;
+}
+
+.nav-menu a:hover {
+  background-color: #1e90ff; /* Ярко-синий при наведении */
+  color: #fff;
+}
+
+/* Аккордеон для подменю ботов */
+.nav-submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #1e2a44;
+  min-width: 200px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  z-index: 101;
+  padding: 10px 0;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+.nav-menu li:hover .nav-submenu {
+  display: block;
+}
+
+.nav-submenu a {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.nav-submenu a:hover {
+  background-color: #1e90ff;
+}
+
+/* Заголовки */
+h1 {
+  font-size: 28px;
+  color: #1e90ff; /* Ярко-синий заголовок */
+  margin: 0 0 20px;
+  word-break: break-word;
+}
+
+h2 {
+  font-size: 24px;
+  color: #1e90ff;
+  margin: 20px 0 10px;
+}
+
+h3 {
+  font-size: 20px;
+  color: #1e90ff;
+  margin-bottom: 15px;
+}
+
+/* Карточка */
+.card {
+  background-color: #1e2a44; /* Тёмно-синий фон карточки */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+
+/* Форма */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form label {
+  font-size: 14px;
+  color: #a0c4ff; /* Светло-синий текст метки */
+  margin-bottom: 5px;
+  display: block;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  background-color: #2a3b5a; /* Тёмно-синий фон полей */
+  color: #d0e6ff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #1e90ff;
+}
+
+.form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Кнопки */
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.button-primary {
+  background-color: #1e90ff; /* Ярко-синий */
+  color: #fff;
+}
+
+.button-primary:hover:not(:disabled) {
+  background-color: #1565c0; /* Темнее при наведении */
+}
+
+.button-danger {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.button-danger:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.button-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Чекбокс */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.checkbox-container input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-container span {
+  font-size: 14px;
+  color: #d0e6ff;
+}
+
+/* Сообщения */
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-bottom: 15px;
+  word-break: break-word;
+}
+
+.success-message {
+  color: #2ecc71;
+  font-size: 14px;
+  margin-bottom: 15px;
+  word-break: break-word;
+}
+
+/* Список команд */
+.command-list {
+  display: grid;
+  gap: 15px;
+}
+
+.command-item {
+  background-color: #1e2a44;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.command-item:hover {
+  background-color: #2a3b5a;
+}
+
+.command-item p {
+  margin: 0;
+  font-size: 16px;
+  color: #d0e6ff;
+  word-break: break-word;
+}
+
+.command-item p strong {
+  color: #d0e6ff;
+}
+
+.command-item .command-content {
+  font-size: 14px;
+  color: #a0c4ff;
+}
+
+.command-item .command-type {
+  font-size: 12px;
+  color: #7da0e0;
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow: auto;
+  padding: 20px;
+}
+
+.modal {
+  background-color: #1e2a44;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  max-width: 90%;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal h3 {
+  font-size: 20px;
+  color: #d0e6ff;
+  margin-bottom: 15px;
+}
+
+.modal p {
+  font-size: 16px;
+  color: #a0c4ff;
+  margin-bottom: 20px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 15px;
+    margin: 10px auto;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .nav-menu ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-menu a {
+    padding: 10px;
+  }
+
+  .nav-submenu {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+    background-color: #2a3b5a;
+  }
+
+  .command-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal {
+    width: 95%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px;
+  }
+
+  .button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+
+  .form input,
+  .form select,
+  .form textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
