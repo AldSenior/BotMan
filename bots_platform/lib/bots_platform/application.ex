@@ -24,7 +24,8 @@ defmodule BotsPlatform.Application do
       {Absinthe.Subscription, BotsPlatformWeb.Endpoint},
 
       # Опрос Telegram API
-      {BotsPlatform.Telegram.PollingHandler, []}
+      {BotsPlatform.Telegram.PollingHandler, []},
+
     ]
 
     opts = [strategy: :one_for_one, name: BotsPlatform.Supervisor]

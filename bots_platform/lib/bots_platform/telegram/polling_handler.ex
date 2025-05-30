@@ -161,7 +161,10 @@ defmodule BotsPlatform.Telegram.PollingHandler do
 
     # Создаем или получаем чат
     case ensure_chat(to_string(chat_id), bot.id, chat_title, chat_type) do
-      {:ok, _chat} ->
+      {:ok, chat} ->
+        # Публикуем информацию о чате только если он успешно создан/найден
+        publish_chat(chat, bot.id)
+
         cond do
           Map.has_key?(message, "text") ->
             text = message["text"]
@@ -373,19 +376,24 @@ defmodule BotsPlatform.Telegram.PollingHandler do
     end
   end
 
-  defp publish_chat(chat, bot_id) do
+  defp publish_chat(%{id: id, chat_id: chat_id, title: title, type: type, inserted_at: inserted_at} = _chat, bot_id) do
     chat_data = %{
-      id: chat.id,
-      chat_id: chat.chat_id,
-      title: chat.title,
-      type: chat.type,
+      id: id,
+      chat_id: chat_id,
+      title: title,
+      type: type,
       bot_id: bot_id,
-      inserted_at: chat.inserted_at
+      inserted_at: inserted_at
     }
 
     Logger.debug("Broadcasting new_chat for bot_id: #{bot_id}, chat: #{inspect(chat_data)}")
     PubSub.broadcast(BotsPlatform.PubSub, "bot:#{bot_id}", {:new_chat, chat_data})
   end
+
+  defp publish_chat(other, _bot_id) do
+    Logger.error("publish_chat received invalid chat data: #{inspect(other)}")
+  end
+
 
   defp find_button_action(received_text, bot_id) do
     commands = Bots.list_bot_commands(bot_id)

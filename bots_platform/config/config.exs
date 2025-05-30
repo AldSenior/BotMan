@@ -40,7 +40,9 @@ config :absinthe, Absinthe.Subscription,
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
-
+config :logger,
+    level: :info,
+    format: "\n$time $metadata[$level] $levelpad$message\n"
 # Конфигурация JSON сериализации
 config :phoenix, :json_library, Jason
 

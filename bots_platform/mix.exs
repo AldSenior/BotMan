@@ -15,8 +15,9 @@ defmodule BotsPlatform.MixProject do
 
   def application do
     [
+      extra_applications: [:logger, :runtime_tools],
       mod: {BotsPlatform.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+
     ]
   end
 
